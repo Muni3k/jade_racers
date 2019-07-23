@@ -14,7 +14,6 @@ import java.util.*;
 
 public class MapAgent extends Agent {
 	private AID[] racerAgents;
-
 	// array of ints that depicts map
 	private int[][] map;
 	// -1 - any racer (graphical: *)
@@ -77,6 +76,8 @@ public class MapAgent extends Agent {
 				System.out.println("---");
 			}
 		} );
+		
+		addBehaviour(new CheckPosition());
 	}
 
 	// Put agent clean-up operations here
@@ -90,6 +91,37 @@ public class MapAgent extends Agent {
 		}
 		// Printout a dismissal message
 		System.out.println("Map Agent "+getAID().getName()+" terminating.");
+	}
+
+	private class CheckPosition extends CyclicBehaviour {
+		public void action() {
+			System.out.println("checkposition - map");
+			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.CFP);
+			ACLMessage msg = myAgent.receive(mt);
+			if (msg != null) {
+				// CFP Message received. Process it
+				String position = msg.getContent();
+				ACLMessage reply = msg.createReply();
+
+				try{
+					String[] tempArray;
+					tempArray = position.split(",");
+					
+					int x = Integer.parseInt(tempArray[0]);
+					int y = Integer.parseInt(tempArray[1]);
+					int roadType = map[x][y];
+					System.out.println("roadType "+roadType);
+					reply.setContent(Integer.toString(roadType));
+				}catch(Exception e){
+					reply.setContent("-1");
+				}
+				
+				myAgent.send(reply);
+			}
+			else {
+				block();
+			}
+		}
 	}
 	
 	private class printMap extends Behaviour {
@@ -154,5 +186,5 @@ public class MapAgent extends Agent {
 			return false;
 		}
 	}  // End of inner class RequestPerformer
-
+	
 }
