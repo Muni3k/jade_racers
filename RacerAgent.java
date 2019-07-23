@@ -12,6 +12,16 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 
 import java.util.*;
 
+/*
+TO DO:
+- wracanie na pozycjach mapy do poprzednich wartosci w tablicy intow
+- ustepowanie innym kierowcom z prawej strony (uwzgledniac kierunek porszuszania sie?)
+- zczytywanie parametrow maxX i maxY od agenta mapy
+- kazdy ruch musi trwac jakis czas; nie moze byc natychmiastowy
+- definiowanie ilosci okrazen obok zmiennej mapy (implementacja liczenia okrazen oraz powrotu z mety na start)
+- komunikacja miedzy kierowca a mapa musi byc w kolejnosci: CFP > PROPOSE > ACCEPT_PROPOSAL > INFORM
+*/
+
 public class RacerAgent extends Agent {
 	private int x;
 	private int y;
@@ -165,11 +175,4 @@ public class RacerAgent extends Agent {
 			}
 		}
 	}
-	// TRY TO MOVE TO NEXT FIELD
-		// IF POSSIBLE - MOVE
-			// HAS TO CHECK POSSIBILITY TO MOVE (only on roads) - communication with map
-			// HAS TO CHECK OTHER RACERS ON THAT FIELD (has to be empty) - communication with racers
-			// HAS TO GIVE A WAY TO RACERS ON THE RIGHT SIDE - communication with racers
-			// HAS TO TAKE TIME
-
 }
