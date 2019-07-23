@@ -109,8 +109,8 @@ public class MapAgent extends Agent {
 				int x = Integer.parseInt(tempArray[0]);
 				int y = Integer.parseInt(tempArray[1]);
                                 
-				int roadType = map[x][y];
-				System.out.println("roadType "+roadType);
+				int roadType = map[y][x];
+				System.out.println("roadType " + roadType);
 				
 				reply.setPerformative(ACLMessage.PROPOSE);
 				reply.setContent(Integer.toString(roadType));
