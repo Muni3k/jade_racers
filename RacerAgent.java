@@ -89,7 +89,6 @@ public class RacerAgent extends Agent {
 		private int newY;
 		
 		public void action() {
-			System.out.println("sendposition - map");
 			switch (step) {
 			case 0:
 				Random r = new Random();
