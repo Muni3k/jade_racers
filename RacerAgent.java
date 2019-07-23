@@ -50,7 +50,7 @@ public class RacerAgent extends Agent {
 					template.addServices(sd);
 					try {
 						DFAgentDescription[] result = DFService.search(myAgent, template); 
-						System.out.println("Found the active maps");
+						System.out.println("Found the following active maps:");
 						mapAgents = new AID[result.length];
 						for (int i = 0; i < result.length; ++i) {
 							mapAgents[i] = result[i].getName();
@@ -62,7 +62,7 @@ public class RacerAgent extends Agent {
 					}
 
 					// Perform the request
-					myAgent.addBehaviour(new RequestPerformer());
+					myAgent.addBehaviour(new makeMove());
 			}
 		});
 	}
@@ -80,7 +80,7 @@ public class RacerAgent extends Agent {
 		System.out.println("Racer Agent "+getAID().getName()+" terminating.");
 	}
 	
-	private class RequestPerformer extends Behaviour {
+	private class makeMove extends Behaviour {
 		private AID map; // The agent who provides the best offer 
 		private MessageTemplate mt; // The template to receive replies
 		private int step = 0;
@@ -90,14 +90,18 @@ public class RacerAgent extends Agent {
 		
 		public void action() {
 			switch (step) {
-			case 0:
+			case 0: //send CFP
 				Random r = new Random();
-				newX = r.nextInt((maxX - x) + 1) + x;
-				newY = r.nextInt((maxY - y) + 1) + y;
+                newX = r.nextInt(((x+1) - (x-1)) + 1) + (x-1);
+				newY = r.nextInt(((y+1) - (y-1)) + 1) + (y-1);
+                if(newX < 0) { newX = 0; }
+                if(newX >= maxX) { newX = 10; }
+                if(newY < 0) { newY = 0; }
+                if(newY >= maxY) { newY = 10; }
 				
 				System.out.println("newX: " + newX);
 				System.out.println("newY: " + newY);
-				// Send the cfp to all sellers
+				// Send the cfp to all maps
 				ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
 				for (int i = 0; i < mapAgents.length; ++i) {
 					cfp.addReceiver(mapAgents[i]);
@@ -112,15 +116,14 @@ public class RacerAgent extends Agent {
 				step = 1;
 				break;
 			case 1:
-				// Receive all proposals/refusals from seller agents
+				// Receive all proposals from map agents
 				ACLMessage reply = myAgent.receive(mt);
 				if (reply != null) {
 					// Reply received
 					if (reply.getPerformative() == ACLMessage.PROPOSE) {
 						// This is an offer 
 						int newPosition = Integer.parseInt(reply.getContent());
-						if (newPosition > -1) {
-							// This is the best offer at present
+						if (newPosition > 1) {
 							x = newX;
 							y = newY;
 						}
@@ -136,7 +139,6 @@ public class RacerAgent extends Agent {
 		
 		public boolean done() {
 			if(step == 2) {
-
 				return true;
 			}
 			return false;
