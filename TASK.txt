@@ -1,0 +1,9 @@
+https://jade.tilab.com/doc/tutorials/JADEAdmin/startJade.html
+
+COMPILE: javac -classpath jade-4.5.0.jar -d classes WYSCIGI/*.java
+START: java -cp jade-4.5.0.jar:classes jade.Boot -gui -platform-id RACERS
+
+4. Proste wyścigi samochodowe
+Wyścig samochodów-agentów po zadanym torze oraz z zadaną liczba okrążeń
+Obserwacja otoczenia przez agenta i unikanie kolizji (wbudowane podstawowe reguły ruchu -- np. pierwszeństwo z prawej strony)
+Schematyczna wizualizacja przebiegu wyścigów
