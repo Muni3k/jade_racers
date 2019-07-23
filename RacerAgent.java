@@ -116,6 +116,7 @@ public class RacerAgent extends Agent {
 				ACLMessage reply = myAgent.receive(mt);
 				if (reply != null) {
 					// Reply received
+					System.out.println("reply != null");
 					if (reply.getPerformative() == ACLMessage.PROPOSE) {
 						// This is an offer 
 						int newPosition = Integer.parseInt(reply.getContent());
@@ -136,7 +137,6 @@ public class RacerAgent extends Agent {
 		
 		public boolean done() {
 			if(step == 2) {
-
 				return true;
 			}
 			return false;

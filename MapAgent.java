@@ -95,6 +95,7 @@ public class MapAgent extends Agent {
 
 	private class CheckPosition extends CyclicBehaviour {
 		public void action() {
+
 			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.CFP);
 			ACLMessage msg = myAgent.receive(mt);
 			if (msg != null) {
@@ -109,10 +110,11 @@ public class MapAgent extends Agent {
 				int y = Integer.parseInt(tempArray[1]);
 				int roadType = map[x][y];
 				System.out.println("roadType "+roadType);
-				reply.setContent(Integer.toString(roadType));
-
 				
-				myAgent.send(reply);
+				reply.setPerformative(ACLMessage.PROPOSE);
+				reply.setContent(Integer.toString(roadType));
+				
+				myAgent.send(reply);				
 			}
 			else {
 				block();
