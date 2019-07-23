@@ -1,6 +1,7 @@
 package examples.WYSCIGI;
 
 import jade.core.Agent;
+import jade.core.AID;
 import jade.core.behaviours.*;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
@@ -12,8 +13,11 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import java.util.*;
 
 public class MapAgent extends Agent {
+	private AID[] racerAgents;
+
 	// array of ints that depicts map
 	private int[][] map;
+	// -1 - any racer (graphical: *)
 	// 0 - void
 	// 5 - low quality road
 	// 7 - mid quality road
@@ -50,12 +54,26 @@ public class MapAgent extends Agent {
 			fe.printStackTrace();
 		}
 
-		// Add the behaviour showing map
+		// Add the behaviour of showing map
 		addBehaviour(new TickerBehaviour(this, 1*1000) {
 			protected void onTick() {
-				for (int i = 0; i < map.length; i++) {
-					System.out.println(Arrays.toString(map[i]));
+				DFAgentDescription template = new DFAgentDescription();
+				ServiceDescription sd = new ServiceDescription();
+				sd.setType("racer-agent");
+				template.addServices(sd);
+				try {
+					DFAgentDescription[] result = DFService.search(myAgent, template); 
+					System.out.println("Found the following racer agents:");
+					racerAgents = new AID[result.length];
+					for (int i = 0; i < result.length; ++i) {
+						racerAgents[i] = result[i].getName();
+						System.out.println(racerAgents[i].getName());
+					}
 				}
+				catch (FIPAException fe) {
+					fe.printStackTrace();
+				}
+				myAgent.addBehaviour(new printMap());
 				System.out.println("---");
 			}
 		} );
@@ -73,25 +91,68 @@ public class MapAgent extends Agent {
 		// Printout a dismissal message
 		System.out.println("Map Agent "+getAID().getName()+" terminating.");
 	}
-/*
-	public void checkMapPos(final int x, final int y) {
-		addBehaviour(new OneShotBehaviour() {
-			public int action() {
-				return map[y][x];
-			}
-		} );
-	}
+	
+	private class printMap extends Behaviour {
+		int[][] map_copy = map;
+		private int repliesCnt = 0; // The counter of replies from racers
+		private MessageTemplate mt; // The template to receive replies
+		private int step = 0;
 
-	public void makeMove(final int x, final int y) {
-		addBehaviour(new OneShotBehaviour() {
-			public int action() {
-				if(map[y][x] == 9) { return 10; } //time in ms to drive there
-				else if(map[y][x] == 7) { return 20; }
-				else if(map[y][x] == 5) { return 30; }
-				else { return -1; }
+		public void action() {
+			switch (step) {
+			case 0:
+				// Send the cfp to all racers
+				ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
+				for (int i = 0; i < racerAgents.length; ++i) {
+					cfp.addReceiver(racerAgents[i]);
+					System.out.println("Sent CFP to " + racerAgents[i].getName());
+				} 
+				cfp.setContent("RACER-POSITION");
+				cfp.setConversationId("racer-pos");
+				cfp.setReplyWith("cfp"+System.currentTimeMillis()); // Unique value
+				myAgent.send(cfp);
+				// Prepare the template to get proposals
+				mt = MessageTemplate.and(MessageTemplate.MatchConversationId("racer-pos"), MessageTemplate.MatchInReplyTo(cfp.getReplyWith()));
+				step = 1;
+				break;
+			case 1:      
+				// Receive the position reply
+				ACLMessage reply = myAgent.receive(mt);
+				if (reply != null) {
+					// reply received
+					if (reply.getPerformative() == ACLMessage.INFORM) {
+						int x = Integer.parseInt(reply.getContent().split(":")[0]);
+						int y = Integer.parseInt(reply.getContent().split(":")[1]);
+						map[x][y] = -1;
+						System.out.println("Position (" + x + ";" + y + ") from agent " + reply.getSender().getName());
+					}
+					else {
+						System.out.println("Attempt failed!");
+					}
+					repliesCnt++;
+					if (repliesCnt >= racerAgents.length) {
+						// We received all replies
+						step = 2;
+					}
+				}
+				else {
+					block();
+				}
+				break;
+			}        
+		}
 
+		public boolean done() {
+			if(step == 2) {
+				for (int i = 0; i < map.length; i++) {
+					String line = Arrays.toString(map_copy[i]);
+					line = line.replace("-1", "*");
+					System.out.println(line);
+				}
+				return true;
 			}
-		} );
-	}
-*/
+			return false;
+		}
+	}  // End of inner class RequestPerformer
+
 }

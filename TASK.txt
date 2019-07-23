@@ -1,7 +1,7 @@
-https://jade.tilab.com/doc/tutorials/JADEAdmin/startJade.html
+ https://jade.tilab.com/doc/tutorials/JADEAdmin/startJade.html
 
 COMPILE: javac -classpath jade-4.5.0.jar -d classes WYSCIGI/*.java
-START: java -cp jade-4.5.0.jar:classes jade.Boot -gui -platform-id RACERS
+START: java -cp jade-4.5.0.jar:classes jade.Boot -agents "r1:examples.WYSCIGI.RacerAgent;r2:examples.WYSCIGI.RacerAgent;map:examples.WYSCIGI.MapAgent" -platform-id RACERS
 
 4. Proste wyścigi samochodowe
 Wyścig samochodów-agentów po zadanym torze oraz z zadaną liczba okrążeń

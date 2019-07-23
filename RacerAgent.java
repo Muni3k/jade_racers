@@ -33,6 +33,8 @@ public class RacerAgent extends Agent {
 		catch (FIPAException fe) {
 			fe.printStackTrace();
 		}
+
+		addBehaviour(new sendPos());
 	}
 
 	// Put agent clean-up operations here
@@ -48,11 +50,31 @@ public class RacerAgent extends Agent {
 		System.out.println("Racer Agent "+getAID().getName()+" terminating.");
 	}
 
-	// TRY TO MOVE TO NEXT FIELD
+	private class sendPos extends CyclicBehaviour {
+		public void action() {
+			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.CFP);
+			ACLMessage msg = myAgent.receive(mt);
+			if (msg != null) {
+				// process it
+				ACLMessage reply = msg.createReply();
+
+				reply.setPerformative(ACLMessage.INFORM);
+				reply.setContent(x + ":" + y);
+				System.out.println(myAgent.getName() + " answered to agent " + msg.getSender().getName() + " with position (" + x + ";" + y + ")");
+
+				myAgent.send(reply);
+			}
+			else {
+				block();
+			}
+		}
+	}  // End of inner class OfferRequestsServer
+
+	// RACER - TRY TO MOVE TO NEXT FIELD (ASKS MAP)
 		// IF POSSIBLE - MOVE
 			// HAS TO CHECK POSSIBILITY TO MOVE (only on roads) - communication with map
 			// HAS TO CHECK OTHER RACERS ON THAT FIELD (has to be empty) - communication with racers
-			// HAS TO GIVE A WAY TO RACERS ON THE RIGHT SIDE - communication with racers
+				// HAS TO GIVE A WAY TO RACERS ON THE RIGHT SIDE - communication with racers
 			// HAS TO TAKE TIME
 
 }
