@@ -93,8 +93,8 @@ public class RacerAgent extends Agent {
 			switch (step) {
 			case 0:
 				Random r = new Random();
-				newX = 0;//r.nextInt((maxX - x) + 1) + x;
-				newY = 0;//r.nextInt((maxY - y) + 1) + y;
+				newX = r.nextInt((maxX - x) + 1) + x;
+				newY = r.nextInt((maxY - y) + 1) + y;
 				
 				System.out.println("newX: " + newX);
 				System.out.println("newY: " + newY);
