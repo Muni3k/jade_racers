@@ -108,6 +108,7 @@ public class MapAgent extends Agent {
 				
 				int x = Integer.parseInt(tempArray[0]);
 				int y = Integer.parseInt(tempArray[1]);
+                                
 				int roadType = map[x][y];
 				System.out.println("roadType "+roadType);
 				
@@ -153,7 +154,7 @@ public class MapAgent extends Agent {
 					if (reply.getPerformative() == ACLMessage.INFORM) {
 						int x = Integer.parseInt(reply.getContent().split(":")[0]);
 						int y = Integer.parseInt(reply.getContent().split(":")[1]);
-						map[x][y] = -1;
+						map[y][x] = -1;
 						System.out.println("Position (" + x + ";" + y + ") from agent " + reply.getSender().getName());
 					}
 					else {
@@ -183,6 +184,6 @@ public class MapAgent extends Agent {
 			}
 			return false;
 		}
-	}  // End of inner class RequestPerformer
+	}
 	
 }
