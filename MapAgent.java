@@ -22,6 +22,8 @@ public class MapAgent extends Agent {
 	// 7 - mid quality road
 	// 9 - high quality road
 	// 1 - roadworks
+    private int maxX;
+    private int maxY;
 
 	// Put agent initializations here
 	protected void setup() {
@@ -39,6 +41,8 @@ public class MapAgent extends Agent {
 			{ 0, 0, 0, 0, 0, 0, 9, 0, 0, 0 },
 	  		{ 0, 0, 0, 0, 0, 0, 9, 9, 9, 9 }
 		};
+        int maxX = map[0].length;
+        int maxY = map.length;
 
 		// Register the Map in the yellow pages
 		DFAgentDescription dfd = new DFAgentDescription();
@@ -114,7 +118,7 @@ public class MapAgent extends Agent {
                 System.out.println("roadType " + roadType);
 				
 				reply.setPerformative(ACLMessage.PROPOSE);
-				reply.setContent(Integer.toString(roadType));
+				reply.setContent(Integer.toString(roadType) + "," + Integer.toString(maxX) + "," + Integer.toString(maxY));
 				
 				myAgent.send(reply);				
 			}

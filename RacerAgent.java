@@ -14,11 +14,12 @@ import java.util.*;
 
 /*
 TO DO:
-- ustepowanie innym kierowcom z prawej strony (uwzgledniac kierunek porszuszania sie?)
-- zczytywanie parametrow maxX i maxY od agenta mapy
+- zczytywanie parametrow maxX i maxY od agenta mapy - jak KURWA przekazac zmienne maxX i maxY miedzy klasami?
 - kazdy ruch musi trwac jakis czas; nie moze byc natychmiastowy
-- definiowanie ilosci okrazen obok zmiennej mapy (implementacja liczenia okrazen oraz powrotu z mety na start)
 - komunikacja miedzy kierowca a mapa musi byc w kolejnosci: CFP > PROPOSE > ACCEPT_PROPOSAL > INFORM
+- ustepowanie innym kierowcom z prawej strony (uwzgledniac kierunek porszuszania sie?)
+- definiowanie ilosci okrazen obok zmiennej mapy (implementacja liczenia okrazen oraz powrotu z mety na start)
+- zdefiniowanie warunku stopu i pokazania wynikow wyscigu
 */
 
 public class RacerAgent extends Agent {
@@ -28,17 +29,18 @@ public class RacerAgent extends Agent {
 	private int oldX;
 	private int oldY;
 	
-	private int maxX = 10;
-	private int maxY = 10;
+	private int maxX;
+	private int maxY;
+    
 	private int oldTypeRoad = 9;
 	private AID[] mapAgents;
-	
 
 	// Put agent initializations here
 	protected void setup() {
 		x = 0;
 		y = 0;
-
+        maxX = 1;
+        maxY = 1;
 
 		// Register the Racer in the yellow pages
 		DFAgentDescription dfd = new DFAgentDescription();
@@ -96,8 +98,8 @@ public class RacerAgent extends Agent {
 	}
 	
 	private class makeMove extends Behaviour {
-		private AID map; // The agent who provides the best offer 
-		private MessageTemplate mt; // The template to receive replies
+		private AID map;
+		private MessageTemplate mt;
 		private int step = 0;
 		
 		private int newX;
@@ -107,12 +109,16 @@ public class RacerAgent extends Agent {
 			switch (step) {
 			case 0: //send CFP
 				Random r = new Random();
+                    
+                System.out.println("maxx " + maxX);
+                System.out.println("maxy " + maxY);
+                    
                 newX = r.nextInt(((x+1) - (x-1)) + 1) + (x-1);
 				newY = r.nextInt(((y+1) - (y-1)) + 1) + (y-1);
-                if(newX < 0) { newX = 0; }
                 if(newX >= maxX) { newX = maxX-1; }
-                if(newY < 0) { newY = 0; }
                 if(newY >= maxY) { newY = maxY-1; }
+                if(newX < 0) { newX = 0; }
+                if(newY < 0) { newY = 0; }
 				
 				System.out.println("newX: " + newX);
 				System.out.println("newY: " + newY);
@@ -137,14 +143,18 @@ public class RacerAgent extends Agent {
 					// Reply received
 					if (reply.getPerformative() == ACLMessage.PROPOSE) {
 						// This is an offer 
-						int newPosition = Integer.parseInt(reply.getContent());
+                        String[] tempArray;
+				        tempArray = reply.getContent().split(",");
+						int newPosition = Integer.parseInt(tempArray[0]);
 						if (newPosition > 1) { //has to be 1 because all below are not 'drivable' fields
 							oldX = x;
 							oldY = y;
 							oldTypeRoad = newPosition;
-							
 							x = newX;
 							y = newY;
+                            
+                            maxX = Integer.parseInt(tempArray[1]);
+                            maxY = Integer.parseInt(tempArray[2]);
 						}
 					}
 					step = 2; 
