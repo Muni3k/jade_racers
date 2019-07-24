@@ -14,7 +14,6 @@ import java.util.*;
 
 /*
 TO DO:
-- wracanie na pozycjach mapy do poprzednich wartosci w tablicy intow
 - ustepowanie innym kierowcom z prawej strony (uwzgledniac kierunek porszuszania sie?)
 - zczytywanie parametrow maxX i maxY od agenta mapy
 - kazdy ruch musi trwac jakis czas; nie moze byc natychmiastowy
@@ -111,9 +110,9 @@ public class RacerAgent extends Agent {
                 newX = r.nextInt(((x+1) - (x-1)) + 1) + (x-1);
 				newY = r.nextInt(((y+1) - (y-1)) + 1) + (y-1);
                 if(newX < 0) { newX = 0; }
-                if(newX >= maxX) { newX = 10; }
+                if(newX >= maxX) { newX = maxX-1; }
                 if(newY < 0) { newY = 0; }
-                if(newY >= maxY) { newY = 10; }
+                if(newY >= maxY) { newY = maxY-1; }
 				
 				System.out.println("newX: " + newX);
 				System.out.println("newY: " + newY);
@@ -139,7 +138,7 @@ public class RacerAgent extends Agent {
 					if (reply.getPerformative() == ACLMessage.PROPOSE) {
 						// This is an offer 
 						int newPosition = Integer.parseInt(reply.getContent());
-						if (newPosition > -1) {
+						if (newPosition > 1) { //has to be 1 because all below are not 'drivable' fields
 							oldX = x;
 							oldY = y;
 							oldTypeRoad = newPosition;
