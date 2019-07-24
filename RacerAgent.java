@@ -15,8 +15,13 @@ import java.util.*;
 public class RacerAgent extends Agent {
 	private int x;
 	private int y;
+	
+	private int oldX;
+	private int oldY;
+	
 	private int maxX = 10;
 	private int maxY = 10;
+	private int oldTypeRoad = 9;
 	private AID[] mapAgents;
 	
 
@@ -124,7 +129,11 @@ public class RacerAgent extends Agent {
 					if (reply.getPerformative() == ACLMessage.PROPOSE) {
 						// This is an offer 
 						int newPosition = Integer.parseInt(reply.getContent());
-						if (newPosition > 1) {
+						if (newPosition > -1) {
+							oldX = x;
+							oldY = y;
+							oldTypeRoad = newPosition;
+							
 							x = newX;
 							y = newY;
 						}
@@ -155,7 +164,7 @@ public class RacerAgent extends Agent {
 				ACLMessage reply = msg.createReply();
 
 				reply.setPerformative(ACLMessage.INFORM);
-				reply.setContent(x + ":" + y);
+				reply.setContent(x + ":" + y + ":" + oldX + ":" + oldY + ":" + oldTypeRoad);
 				System.out.println(myAgent.getName() + " answered to agent " + msg.getSender().getName() + " with position (" + x + ";" + y + ")");
 
 				myAgent.send(reply);
