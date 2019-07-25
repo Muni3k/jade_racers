@@ -16,6 +16,7 @@ public class MapAgent extends Agent {
 	private AID[] racerAgents;
 	// array of ints that depicts map
 	private int[][] map;
+    private int[][] map_const;
 	// -1 - any racer (graphical: *)
 	// 0 - void
 	// 5 - high quality road
@@ -24,6 +25,7 @@ public class MapAgent extends Agent {
 	// 1 - roadworks
     private int maxX;
     private int maxY;
+    private int laps;
 
 	// Put agent initializations here
 	protected void setup() {
@@ -41,6 +43,13 @@ public class MapAgent extends Agent {
 			{ 0, 0, 0, 0, 0, 0, 9, 0, 0, 0 },
 	  		{ 0, 0, 0, 0, 0, 0, 9, 9, 9, 9 }
 		};
+        /*map = new int[][] {
+	  		{ 9, 5, 7 },
+	  		{ 0, 0, 5 },
+	  		{ 0, 0, 9 }
+		};*/
+        map_const = map;
+        laps = 3;
         maxX = map[0].length;
         maxY = map.length;
 
@@ -130,7 +139,7 @@ public class MapAgent extends Agent {
 	}
 	
 	private class printMap extends Behaviour {
-		int[][] map_copy = map;
+        int[][] map_copy = map_const;
 		private int repliesCnt = 0; // The counter of replies from racers
 		private MessageTemplate mt; // The template to receive replies
 		private int step = 0;
@@ -138,6 +147,7 @@ public class MapAgent extends Agent {
 		public void action() {
 			switch (step) {
 			case 0:
+                map_copy = map_const;
 				// Send the cfp to all racers
 				ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
 				for (int i = 0; i < racerAgents.length; ++i) {
@@ -164,6 +174,9 @@ public class MapAgent extends Agent {
 						int oldX = Integer.parseInt(reply.getContent().split(",")[2]);
 						int oldY = Integer.parseInt(reply.getContent().split(",")[3]);
 						int oldTypeRoad = Integer.parseInt(reply.getContent().split(",")[4]);
+                        
+                        int lap = Integer.parseInt(reply.getContent().split(":")[5]);
+                        if(laps <= lap) { System.out.println("Linie mety przekroczyl kierowca " + reply.getSender().getName()); }
 						
 						map[oldY][oldX] = oldTypeRoad;
 						map[y][x] = -1;

@@ -16,15 +16,16 @@ import java.util.*;
 /*
 TO DO:
 - zczytywanie parametrow maxX i maxY od agenta mapy - jak KURWA przekazac zmienne maxX i maxY miedzy klasami?
+- mapa potrafi dublowac kierowcow (gwiazdki) z powodu natury asynchronicznej
 - komunikacja miedzy kierowca a mapa musi byc w kolejnosci: CFP > PROPOSE > ACCEPT_PROPOSAL > INFORM
 - ustepowanie innym kierowcom z prawej strony (uwzgledniac kierunek porszuszania sie?)
-- definiowanie ilosci okrazen obok zmiennej mapy (implementacja liczenia okrazen oraz powrotu z mety na start)
-- zdefiniowanie warunku stopu i pokazania wynikow wyscigu
 */
 
 public class RacerAgent extends Agent {
 	private int x;
 	private int y;
+    
+    private int lap;
 	
 	private int oldX;
 	private int oldY;
@@ -39,8 +40,9 @@ public class RacerAgent extends Agent {
 	protected void setup() {
 		x = 0;
 		y = 0;
-        maxX = 10;
-        maxY = 10;
+        lap = 1;
+        maxX = 1;
+        maxY = 1;
 
 		// Register the Racer in the yellow pages
 		DFAgentDescription dfd = new DFAgentDescription();
@@ -118,6 +120,9 @@ public class RacerAgent extends Agent {
 			case 0: //send CFP
 				Random r = new Random();
                     
+                //System.out.println("maxx " + maxX);
+                //System.out.println("maxy " + maxY);
+                    
                 newX = r.nextInt(((x+1) - (x-1)) + 1) + (x-1);
 				newY = r.nextInt(((y+1) - (y-1)) + 1) + (y-1);
                 if(newX >= maxX) { newX = maxX-1; }
@@ -158,6 +163,8 @@ public class RacerAgent extends Agent {
 							x = newX;
 							y = newY;
                             
+                            if(x == maxX-1 && y == maxY-1) { lap++; x = 0; y = 0; }
+                            
                             try
                             {
                                 TimeUnit.SECONDS.sleep(newPosition/10);
@@ -197,10 +204,8 @@ public class RacerAgent extends Agent {
 				ACLMessage reply = msg.createReply();
 
 				reply.setPerformative(ACLMessage.INFORM);
-
-				reply.setContent(x + "," + y + "," + oldX + "," + oldY + "," + oldTypeRoad);
-				//reply.setConversationId("racer-agent-move");
-				//System.out.println(myAgent.getName() + " answered to agent " + msg.getSender().getName() + " with position (" + x + ";" + y + ")");
+				reply.setContent(x + ":" + y + ":" + oldX + ":" + oldY + ":" + oldTypeRoad + ":" + lap);
+				System.out.println(myAgent.getName() + " answered to agent " + msg.getSender().getName() + " with position (" + x + ";" + y + ") and lap no " + lap);
 
 				myAgent.send(reply);
 			}
