@@ -112,9 +112,6 @@ public class RacerAgent extends Agent {
 		private int newX;
 		private int newY;
         
-        private int maxX = 10; //temporary
-	    private int maxY = 10; //temporary
-		
 		public void action() {
 			switch (step) {
 			case 0: //send CFP
@@ -205,7 +202,7 @@ public class RacerAgent extends Agent {
 
 				reply.setPerformative(ACLMessage.INFORM);
 				reply.setContent(x + ":" + y + ":" + oldX + ":" + oldY + ":" + oldTypeRoad + ":" + lap);
-				System.out.println(myAgent.getName() + " answered to agent " + msg.getSender().getName() + " with position (" + x + ";" + y + ") and lap no " + lap);
+				//System.out.println(myAgent.getName() + " answered to agent " + msg.getSender().getName() + " with position (" + x + ";" + y + ") and lap no " + lap);
 
 				myAgent.send(reply);
 			}
@@ -217,7 +214,7 @@ public class RacerAgent extends Agent {
 	
 	private class sendAskForSizeOfMap extends OneShotBehaviour{
 		public void action() {
-			System.out.println("sendAskForSizeOfMap");
+			//System.out.println("sendAskForSizeOfMap");
 			ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
 			for (int i = 0; i < mapAgents.length; ++i) {
 				cfp.addReceiver(mapAgents[i]);
@@ -244,7 +241,7 @@ public class RacerAgent extends Agent {
 				maxX = Integer.parseInt(tempArray[0]);
 				maxY = Integer.parseInt(tempArray[1]);
 				
-				System.out.println("Max: " + maxX + " MaxY: " + maxY);
+				//System.out.println("Max: " + maxX + " MaxY: " + maxY);
 			}
 		}
 	}

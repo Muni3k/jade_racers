@@ -87,7 +87,7 @@ public class MapAgent extends Agent {
 					fe.printStackTrace();
 				}
 				myAgent.addBehaviour(new printMap());
-				//System.out.println("---");
+				System.out.println("---");
 			}
 		} );
 		
@@ -168,12 +168,12 @@ public class MapAgent extends Agent {
 				if (reply != null) {
 					// reply received
 					if (reply.getPerformative() == ACLMessage.INFORM) {
-						int x = Integer.parseInt(reply.getContent().split(",")[0]);
-						int y = Integer.parseInt(reply.getContent().split(",")[1]);
+						int x = Integer.parseInt(reply.getContent().split(":")[0]);
+						int y = Integer.parseInt(reply.getContent().split(":")[1]);
 						
-						int oldX = Integer.parseInt(reply.getContent().split(",")[2]);
-						int oldY = Integer.parseInt(reply.getContent().split(",")[3]);
-						int oldTypeRoad = Integer.parseInt(reply.getContent().split(",")[4]);
+						int oldX = Integer.parseInt(reply.getContent().split(":")[2]);
+						int oldY = Integer.parseInt(reply.getContent().split(":")[3]);
+						int oldTypeRoad = Integer.parseInt(reply.getContent().split(":")[4]);
                         
                         int lap = Integer.parseInt(reply.getContent().split(":")[5]);
                         if(laps <= lap) { System.out.println("Linie mety przekroczyl kierowca " + reply.getSender().getName()); }
@@ -215,14 +215,14 @@ public class MapAgent extends Agent {
 		public void action() {
 			MessageTemplate mt = MessageTemplate.MatchConversationId("map-agent-sieze-of-map");
 			ACLMessage msg = myAgent.receive(mt);
-			System.out.println("sendSizeOfMap v1");
+			//System.out.println("sendSizeOfMap v1");
 			if (msg != null) {
 				// CFP Message received. Process it
 				String position = msg.getContent();
 				ACLMessage reply = msg.createReply();
 
-				System.out.println("sendSizeOfMap v2");
-				reply.setPerformative(ACLMessage.PROPOSE);
+				//System.out.println("sendSizeOfMap v2");
+				reply.setPerformative(ACLMessage.INFORM);
 				reply.setContent(Integer.toString(maxX) + "," + Integer.toString(maxY));
 				
 				myAgent.send(reply);				
