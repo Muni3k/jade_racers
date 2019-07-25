@@ -41,8 +41,8 @@ public class MapAgent extends Agent {
 			{ 0, 0, 0, 0, 0, 0, 9, 0, 0, 0 },
 	  		{ 0, 0, 0, 0, 0, 0, 9, 9, 9, 9 }
 		};
-        int maxX = map[0].length;
-        int maxY = map.length;
+        maxX = map[0].length;
+        maxY = map.length;
 
 		// Register the Map in the yellow pages
 		DFAgentDescription dfd = new DFAgentDescription();
@@ -67,22 +67,23 @@ public class MapAgent extends Agent {
 				template.addServices(sd);
 				try {
 					DFAgentDescription[] result = DFService.search(myAgent, template); 
-					System.out.println("Found the following racer agents:");
+					//System.out.println("Found the following racer agents:");
 					racerAgents = new AID[result.length];
 					for (int i = 0; i < result.length; ++i) {
 						racerAgents[i] = result[i].getName();
-						System.out.println(racerAgents[i].getName());
+						//System.out.println(racerAgents[i].getName());
 					}
 				}
 				catch (FIPAException fe) {
 					fe.printStackTrace();
 				}
 				myAgent.addBehaviour(new printMap());
-				System.out.println("---");
+				//System.out.println("---");
 			}
 		} );
 		
 		addBehaviour(new CheckPosition());
+		addBehaviour(new sendSizeOfMap());
 	}
 
 	// Put agent clean-up operations here
@@ -95,13 +96,13 @@ public class MapAgent extends Agent {
 			fe.printStackTrace();
 		}
 		// Printout a dismissal message
-		System.out.println("Map Agent "+getAID().getName()+" terminating.");
+		//System.out.println("Map Agent "+getAID().getName()+" terminating.");
 	}
 
 	private class CheckPosition extends CyclicBehaviour {
 		public void action() {
 
-			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.CFP);
+			MessageTemplate mt = MessageTemplate.MatchConversationId("racer-agent-move"); //MessageTemplate.MatchPerformative(ACLMessage.CFP);
 			ACLMessage msg = myAgent.receive(mt);
 			if (msg != null) {
 				// CFP Message received. Process it
@@ -115,7 +116,7 @@ public class MapAgent extends Agent {
 				int y = Integer.parseInt(tempArray[1]);
                                 
 				int roadType = map[y][x];
-                System.out.println("roadType " + roadType);
+                //System.out.println("roadType " + roadType);
 				
 				reply.setPerformative(ACLMessage.PROPOSE);
 				reply.setContent(Integer.toString(roadType) + "," + Integer.toString(maxX) + "," + Integer.toString(maxY));
@@ -141,7 +142,7 @@ public class MapAgent extends Agent {
 				ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
 				for (int i = 0; i < racerAgents.length; ++i) {
 					cfp.addReceiver(racerAgents[i]);
-					System.out.println("Sent CFP to " + racerAgents[i].getName());
+					//System.out.println("Sent CFP to " + racerAgents[i].getName());
 				} 
 				cfp.setContent("RACER-POSITION");
 				cfp.setConversationId("racer-pos");
@@ -157,19 +158,19 @@ public class MapAgent extends Agent {
 				if (reply != null) {
 					// reply received
 					if (reply.getPerformative() == ACLMessage.INFORM) {
-						int x = Integer.parseInt(reply.getContent().split(":")[0]);
-						int y = Integer.parseInt(reply.getContent().split(":")[1]);
+						int x = Integer.parseInt(reply.getContent().split(",")[0]);
+						int y = Integer.parseInt(reply.getContent().split(",")[1]);
 						
-						int oldX = Integer.parseInt(reply.getContent().split(":")[2]);
-						int oldY = Integer.parseInt(reply.getContent().split(":")[3]);
-						int oldTypeRoad = Integer.parseInt(reply.getContent().split(":")[4]);
+						int oldX = Integer.parseInt(reply.getContent().split(",")[2]);
+						int oldY = Integer.parseInt(reply.getContent().split(",")[3]);
+						int oldTypeRoad = Integer.parseInt(reply.getContent().split(",")[4]);
 						
 						map[oldY][oldX] = oldTypeRoad;
 						map[y][x] = -1;
-						System.out.println("Position (" + x + ";" + y + ") from agent " + reply.getSender().getName());
+						//System.out.println("Position (" + x + ";" + y + ") from agent " + reply.getSender().getName());
 					}
 					else {
-						System.out.println("Attempt failed!");
+						//System.out.println("Attempt failed!");
 					}
 					repliesCnt++;
 					if (repliesCnt >= racerAgents.length) {
@@ -197,4 +198,25 @@ public class MapAgent extends Agent {
 		}
 	}
 	
+	private class sendSizeOfMap extends CyclicBehaviour {
+		public void action() {
+			MessageTemplate mt = MessageTemplate.MatchConversationId("map-agent-sieze-of-map");
+			ACLMessage msg = myAgent.receive(mt);
+			System.out.println("sendSizeOfMap v1");
+			if (msg != null) {
+				// CFP Message received. Process it
+				String position = msg.getContent();
+				ACLMessage reply = msg.createReply();
+
+				System.out.println("sendSizeOfMap v2");
+				reply.setPerformative(ACLMessage.PROPOSE);
+				reply.setContent(Integer.toString(maxX) + "," + Integer.toString(maxY));
+				
+				myAgent.send(reply);				
+			}
+			else {
+				block();
+			}
+		}
+	}
 }
