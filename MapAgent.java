@@ -18,9 +18,9 @@ public class MapAgent extends Agent {
 	private int[][] map;
 	// -1 - any racer (graphical: *)
 	// 0 - void
-	// 5 - low quality road
+	// 5 - high quality road
 	// 7 - mid quality road
-	// 9 - high quality road
+	// 9 - low quality road
 	// 1 - roadworks
     private int maxX;
     private int maxY;
@@ -67,11 +67,11 @@ public class MapAgent extends Agent {
 				template.addServices(sd);
 				try {
 					DFAgentDescription[] result = DFService.search(myAgent, template); 
-					System.out.println("Found the following racer agents:");
+					//System.out.println("Found the following racer agents:");
 					racerAgents = new AID[result.length];
 					for (int i = 0; i < result.length; ++i) {
 						racerAgents[i] = result[i].getName();
-						System.out.println(racerAgents[i].getName());
+						//System.out.println(racerAgents[i].getName());
 					}
 				}
 				catch (FIPAException fe) {
@@ -115,7 +115,7 @@ public class MapAgent extends Agent {
 				int y = Integer.parseInt(tempArray[1]);
                                 
 				int roadType = map[y][x];
-                System.out.println("roadType " + roadType);
+                //System.out.println("roadType " + roadType);
 				
 				reply.setPerformative(ACLMessage.PROPOSE);
 				reply.setContent(Integer.toString(roadType) + "," + Integer.toString(maxX) + "," + Integer.toString(maxY));
@@ -141,7 +141,7 @@ public class MapAgent extends Agent {
 				ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
 				for (int i = 0; i < racerAgents.length; ++i) {
 					cfp.addReceiver(racerAgents[i]);
-					System.out.println("Sent CFP to " + racerAgents[i].getName());
+					//System.out.println("Sent CFP to " + racerAgents[i].getName());
 				} 
 				cfp.setContent("RACER-POSITION");
 				cfp.setConversationId("racer-pos");
@@ -166,7 +166,7 @@ public class MapAgent extends Agent {
 						
 						map[oldY][oldX] = oldTypeRoad;
 						map[y][x] = -1;
-						System.out.println("Position (" + x + ";" + y + ") from agent " + reply.getSender().getName());
+						//System.out.println("Position (" + x + ";" + y + ") from agent " + reply.getSender().getName());
 					}
 					else {
 						System.out.println("Attempt failed!");

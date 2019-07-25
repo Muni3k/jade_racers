@@ -7,6 +7,7 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
+import java.util.concurrent.TimeUnit;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 
@@ -15,7 +16,6 @@ import java.util.*;
 /*
 TO DO:
 - zczytywanie parametrow maxX i maxY od agenta mapy - jak KURWA przekazac zmienne maxX i maxY miedzy klasami?
-- kazdy ruch musi trwac jakis czas; nie moze byc natychmiastowy
 - komunikacja miedzy kierowca a mapa musi byc w kolejnosci: CFP > PROPOSE > ACCEPT_PROPOSAL > INFORM
 - ustepowanie innym kierowcom z prawej strony (uwzgledniac kierunek porszuszania sie?)
 - definiowanie ilosci okrazen obok zmiennej mapy (implementacja liczenia okrazen oraz powrotu z mety na start)
@@ -59,7 +59,7 @@ public class RacerAgent extends Agent {
 		addBehaviour(new sendPos());
 		addBehaviour(new TickerBehaviour(this, 1*1000) {
 			protected void onTick() {
-					System.out.println("Trying to find maps");
+					//System.out.println("Trying to find maps");
 					// Update the list of seller agents
 					DFAgentDescription template = new DFAgentDescription();
 					ServiceDescription sd = new ServiceDescription();
@@ -67,11 +67,11 @@ public class RacerAgent extends Agent {
 					template.addServices(sd);
 					try {
 						DFAgentDescription[] result = DFService.search(myAgent, template); 
-						System.out.println("Found the following active maps:");
+						//System.out.println("Found the following active maps:");
 						mapAgents = new AID[result.length];
 						for (int i = 0; i < result.length; ++i) {
 							mapAgents[i] = result[i].getName();
-							System.out.println(mapAgents[i].getName());
+							//System.out.println(mapAgents[i].getName());
 						}
 					}
 					catch (FIPAException fe) {
@@ -104,6 +104,9 @@ public class RacerAgent extends Agent {
 		
 		private int newX;
 		private int newY;
+        
+        private int maxX = 10; //temporary
+	    private int maxY = 10; //temporary
 		
 		public void action() {
 			switch (step) {
@@ -120,8 +123,8 @@ public class RacerAgent extends Agent {
                 if(newX < 0) { newX = 0; }
                 if(newY < 0) { newY = 0; }
 				
-				System.out.println("newX: " + newX);
-				System.out.println("newY: " + newY);
+				//System.out.println("newX: " + newX);
+				//System.out.println("newY: " + newY);
 				// Send the cfp to all maps
 				ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
 				for (int i = 0; i < mapAgents.length; ++i) {
@@ -152,6 +155,15 @@ public class RacerAgent extends Agent {
 							oldTypeRoad = newPosition;
 							x = newX;
 							y = newY;
+                            
+                            try
+                            {
+                                TimeUnit.SECONDS.sleep(newPosition/10);
+                            }
+                            catch(InterruptedException ex)
+                            {
+                                Thread.currentThread().interrupt();
+                            }
                             
                             maxX = Integer.parseInt(tempArray[1]);
                             maxY = Integer.parseInt(tempArray[2]);
@@ -184,7 +196,7 @@ public class RacerAgent extends Agent {
 
 				reply.setPerformative(ACLMessage.INFORM);
 				reply.setContent(x + ":" + y + ":" + oldX + ":" + oldY + ":" + oldTypeRoad);
-				System.out.println(myAgent.getName() + " answered to agent " + msg.getSender().getName() + " with position (" + x + ";" + y + ")");
+				//System.out.println(myAgent.getName() + " answered to agent " + msg.getSender().getName() + " with position (" + x + ";" + y + ")");
 
 				myAgent.send(reply);
 			}
