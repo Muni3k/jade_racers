@@ -79,6 +79,7 @@ public class RacerAgent extends Agent {
 					}
 
 					// Perform the request
+					myAgent.addBehaviour(new sendAskForSizeOfMap());
 					myAgent.addBehaviour(new getSizeOfMap());
 					myAgent.addBehaviour(new makeMove());
 					
@@ -196,6 +197,7 @@ public class RacerAgent extends Agent {
 				ACLMessage reply = msg.createReply();
 
 				reply.setPerformative(ACLMessage.INFORM);
+
 				reply.setContent(x + "," + y + "," + oldX + "," + oldY + "," + oldTypeRoad);
 				//reply.setConversationId("racer-agent-move");
 				//System.out.println(myAgent.getName() + " answered to agent " + msg.getSender().getName() + " with position (" + x + ";" + y + ")");
@@ -208,8 +210,9 @@ public class RacerAgent extends Agent {
 		}
 	}
 	
-	private class getSizeOfMap extends CyclicBehaviour{
+	private class sendAskForSizeOfMap extends OneShotBehaviour{
 		public void action() {
+			System.out.println("sendAskForSizeOfMap");
 			ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
 			for (int i = 0; i < mapAgents.length; ++i) {
 				cfp.addReceiver(mapAgents[i]);
@@ -218,9 +221,15 @@ public class RacerAgent extends Agent {
 			cfp.setConversationId("map-agent-sieze-of-map");
 			cfp.setReplyWith("cfp"+System.currentTimeMillis()); // Unique value
 			myAgent.send(cfp);
+		}
+	}
+	
+	private class getSizeOfMap extends CyclicBehaviour{
+		
+		public void action() {
+			//System.out.println("getSizeOfMap");
 			// Prepare the template to get proposals
-			MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId("map-agent-sieze-of-map"),
-			MessageTemplate.MatchInReplyTo(cfp.getReplyWith()));
+			MessageTemplate mt = MessageTemplate.MatchConversationId("map-agent-sieze-of-map");
 			
 			ACLMessage reply = myAgent.receive(mt);
 			if (reply != null) {
