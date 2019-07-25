@@ -18,9 +18,9 @@ public class MapAgent extends Agent {
 	private int[][] map;
 	// -1 - any racer (graphical: *)
 	// 0 - void
-	// 5 - low quality road
+	// 5 - high quality road
 	// 7 - mid quality road
-	// 9 - high quality road
+	// 9 - low quality road
 	// 1 - roadworks
     private int maxX;
     private int maxY;

@@ -7,6 +7,7 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
+import java.util.concurrent.TimeUnit;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 
@@ -15,7 +16,6 @@ import java.util.*;
 /*
 TO DO:
 - zczytywanie parametrow maxX i maxY od agenta mapy - jak KURWA przekazac zmienne maxX i maxY miedzy klasami?
-- kazdy ruch musi trwac jakis czas; nie moze byc natychmiastowy
 - komunikacja miedzy kierowca a mapa musi byc w kolejnosci: CFP > PROPOSE > ACCEPT_PROPOSAL > INFORM
 - ustepowanie innym kierowcom z prawej strony (uwzgledniac kierunek porszuszania sie?)
 - definiowanie ilosci okrazen obok zmiennej mapy (implementacja liczenia okrazen oraz powrotu z mety na start)
@@ -108,6 +108,9 @@ public class RacerAgent extends Agent {
 		
 		private int newX;
 		private int newY;
+        
+        private int maxX = 10; //temporary
+	    private int maxY = 10; //temporary
 		
 		public void action() {
 			switch (step) {
@@ -153,6 +156,15 @@ public class RacerAgent extends Agent {
 							oldTypeRoad = newPosition;
 							x = newX;
 							y = newY;
+                            
+                            try
+                            {
+                                TimeUnit.SECONDS.sleep(newPosition/10);
+                            }
+                            catch(InterruptedException ex)
+                            {
+                                Thread.currentThread().interrupt();
+                            }
                             
                             maxX = Integer.parseInt(tempArray[1]);
                             maxY = Integer.parseInt(tempArray[2]);
