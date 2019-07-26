@@ -16,7 +16,8 @@ public class MapAgent extends Agent {
 	private AID[] racerAgents;
 	// array of ints that depicts map
 	private int[][] map;
-    private int[][] map_const;
+    //private int[][] map_const;
+	private Map<String, List<Integer>> racersMap = new HashMap<>();
 	// -1 - any racer (graphical: *)
 	// 0 - void
 	// 5 - high quality road
@@ -48,7 +49,7 @@ public class MapAgent extends Agent {
 	  		{ 0, 0, 5 },
 	  		{ 0, 0, 9 }
 		};*/
-        map_const = map;
+        //map_const = map;
         laps = 3;
         maxX = map[0].length;
         maxY = map.length;
@@ -87,7 +88,7 @@ public class MapAgent extends Agent {
 					fe.printStackTrace();
 				}
 				myAgent.addBehaviour(new printMap());
-				System.out.println("---");
+				//System.out.println("---");
 			}
 		} );
 		
@@ -119,7 +120,7 @@ public class MapAgent extends Agent {
 				ACLMessage reply = msg.createReply();
 
 				String[] tempArray;
-				tempArray = position.split(",");
+				tempArray = position.split(":");
 				
 				int x = Integer.parseInt(tempArray[0]);
 				int y = Integer.parseInt(tempArray[1]);
@@ -128,7 +129,7 @@ public class MapAgent extends Agent {
                 //System.out.println("roadType " + roadType);
 				
 				reply.setPerformative(ACLMessage.PROPOSE);
-				reply.setContent(Integer.toString(roadType) + "," + Integer.toString(maxX) + "," + Integer.toString(maxY));
+				reply.setContent(Integer.toString(roadType) + ":" + Integer.toString(maxX) + ":" + Integer.toString(maxY));
 				
 				myAgent.send(reply);				
 			}
@@ -139,7 +140,7 @@ public class MapAgent extends Agent {
 	}
 	
 	private class printMap extends Behaviour {
-        int[][] map_copy = map_const;
+        //int[][] map_copy = map_const;
 		private int repliesCnt = 0; // The counter of replies from racers
 		private MessageTemplate mt; // The template to receive replies
 		private int step = 0;
@@ -147,7 +148,7 @@ public class MapAgent extends Agent {
 		public void action() {
 			switch (step) {
 			case 0:
-                map_copy = map_const;
+                //map_copy = map_const;
 				// Send the cfp to all racers
 				ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
 				for (int i = 0; i < racerAgents.length; ++i) {
@@ -178,8 +179,13 @@ public class MapAgent extends Agent {
                         int lap = Integer.parseInt(reply.getContent().split(":")[5]);
                         if(laps <= lap) { System.out.println("Linie mety przekroczyl kierowca " + reply.getSender().getName()); }
 						
-						map[oldY][oldX] = oldTypeRoad;
-						map[y][x] = -1;
+						//map[oldY][oldX] = oldTypeRoad;
+						//map[y][x] = -1;
+						
+						List<Integer> position = new ArrayList<Integer>();
+						position.add(y);
+						position.add(x);
+						racersMap.put(reply.getSender().getLocalName(), position);
 						//System.out.println("Position (" + x + ";" + y + ") from agent " + reply.getSender().getName());
 					}
 					else {
@@ -199,6 +205,19 @@ public class MapAgent extends Agent {
 		}
 
 		public boolean done() {
+			int[][] map_copy = new int[map.length][];
+			for (int i = 0; i < map.length; i++) {
+				map_copy[i] = Arrays.copyOf(map[i], map[i].length);
+			}
+
+			for (Map.Entry<String, List<Integer>> entry : racersMap.entrySet()) {
+				List<Integer> tmp = entry.getValue();
+				int y = tmp.get(0);
+				int x = tmp.get(1);
+				
+				map_copy[y][x] = -1;
+			}
+			
 			if(step == 2) {
 				for (int i = 0; i < map.length; i++) {
 					String line = Arrays.toString(map_copy[i]);
@@ -223,7 +242,7 @@ public class MapAgent extends Agent {
 
 				//System.out.println("sendSizeOfMap v2");
 				reply.setPerformative(ACLMessage.INFORM);
-				reply.setContent(Integer.toString(maxX) + "," + Integer.toString(maxY));
+				reply.setContent(Integer.toString(maxX) + ":" + Integer.toString(maxY));
 				
 				myAgent.send(reply);				
 			}

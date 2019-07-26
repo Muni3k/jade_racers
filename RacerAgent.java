@@ -134,7 +134,7 @@ public class RacerAgent extends Agent {
 				for (int i = 0; i < mapAgents.length; ++i) {
 					cfp.addReceiver(mapAgents[i]);
 				} 
-				cfp.setContent(newX + "," + newY);
+				cfp.setContent(newX + ":" + newY);
 				cfp.setConversationId("racer-agent-move");
 				cfp.setReplyWith("cfp"+System.currentTimeMillis()); // Unique value
 				myAgent.send(cfp);
@@ -151,7 +151,7 @@ public class RacerAgent extends Agent {
 					if (reply.getPerformative() == ACLMessage.PROPOSE) {
 						// This is an offer 
                         String[] tempArray;
-				        tempArray = reply.getContent().split(",");
+				        tempArray = reply.getContent().split(":");
 						int newPosition = Integer.parseInt(tempArray[0]);
 						if (newPosition > 1) { //has to be 1 because all below are not 'drivable' fields
 							oldX = x;
@@ -237,7 +237,7 @@ public class RacerAgent extends Agent {
 			if (reply != null) {
 				
 				String[] tempArray;
-				tempArray = reply.getContent().split(",");
+				tempArray = reply.getContent().split(":");
 				maxX = Integer.parseInt(tempArray[0]);
 				maxY = Integer.parseInt(tempArray[1]);
 				
