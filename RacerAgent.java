@@ -13,14 +13,6 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 
 import java.util.*;
 
-/*
-TO DO:
-- zczytywanie parametrow maxX i maxY od agenta mapy - jak KURWA przekazac zmienne maxX i maxY miedzy klasami?
-- mapa potrafi dublowac kierowcow (gwiazdki) z powodu natury asynchronicznej
-- komunikacja miedzy kierowca a mapa musi byc w kolejnosci: CFP > PROPOSE > ACCEPT_PROPOSAL > INFORM
-- ustepowanie innym kierowcom z prawej strony (uwzgledniac kierunek porszuszania sie?)
-*/
-
 public class RacerAgent extends Agent {
 	private int x;
 	private int y;
@@ -111,6 +103,7 @@ public class RacerAgent extends Agent {
 		
 		private int newX;
 		private int newY;
+        private int newPosition;
         
 		public void action() {
 			switch (step) {
@@ -152,30 +145,54 @@ public class RacerAgent extends Agent {
 						// This is an offer 
                         String[] tempArray;
 				        tempArray = reply.getContent().split(":");
-						int newPosition = Integer.parseInt(tempArray[0]);
-						if (newPosition > 1) { //has to be 1 because all below are not 'drivable' fields
-							oldX = x;
-							oldY = y;
-							oldTypeRoad = newPosition;
-							x = newX;
-							y = newY;
-                            
-                            if(x == maxX-1 && y == maxY-1) { lap++; x = 0; y = 0; }
-                            
-                            try
-                            {
-                                TimeUnit.SECONDS.sleep(newPosition/10);
-                            }
-                            catch(InterruptedException ex)
-                            {
-                                Thread.currentThread().interrupt();
-                            }
-                            
-                            maxX = Integer.parseInt(tempArray[1]);
-                            maxY = Integer.parseInt(tempArray[2]);
-						}
+						newPosition = Integer.parseInt(tempArray[0]);
+                        maxX = Integer.parseInt(tempArray[1]);
+                        maxY = Integer.parseInt(tempArray[2]);
 					}
 					step = 2; 
+				}
+            case 2:
+                ACLMessage order;
+                if (newPosition > 1) { //has to be 1 because all below are not 'drivable' fields
+				    order = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
+                } else {
+                    order = new ACLMessage(ACLMessage.REJECT_PROPOSAL);
+                }
+                for (int i = 0; i < mapAgents.length; ++i) {
+					order.addReceiver(mapAgents[i]);
+				}
+                order.setContent("rsp");
+				order.setConversationId("racer-agent-move");
+				order.setReplyWith("order"+System.currentTimeMillis());
+				myAgent.send(order);
+				mt = MessageTemplate.and(MessageTemplate.MatchConversationId("racer-agent-move"), MessageTemplate.MatchInReplyTo(order.getReplyWith()));
+				step = 3;
+				break;
+			case 3:
+				reply = myAgent.receive(mt);
+				if (reply != null) {
+					if (reply.getPerformative() == ACLMessage.INFORM) {
+                        oldX = x;
+                        oldY = y;
+                        oldTypeRoad = newPosition;
+                        x = newX;
+                        y = newY;
+
+                        if(x == maxX-1 && y == maxY-1) { lap++; x = 0; y = 0; }
+
+                        try
+                        {
+                            TimeUnit.SECONDS.sleep(newPosition/10);
+                        }
+                        catch(InterruptedException ex)
+                        {
+                            Thread.currentThread().interrupt();
+                        }
+                        
+					} else {
+						System.out.println("ERROR");
+					}
+					step = 4;
 				}
 				else {
 					block();
@@ -185,7 +202,7 @@ public class RacerAgent extends Agent {
 		}
 		
 		public boolean done() {
-			if(step == 2) {
+			if(step == 4) {
 				return true;
 			}
 			return false;

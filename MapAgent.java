@@ -88,11 +88,12 @@ public class MapAgent extends Agent {
 					fe.printStackTrace();
 				}
 				myAgent.addBehaviour(new printMap());
-				//System.out.println("---");
+				System.out.println("---");
 			}
 		} );
 		
 		addBehaviour(new CheckPosition());
+        addBehaviour(new CheckPositionInform());
 		addBehaviour(new sendSizeOfMap());
 	}
 
@@ -112,9 +113,9 @@ public class MapAgent extends Agent {
 	private class CheckPosition extends CyclicBehaviour {
 		public void action() {
 
-			MessageTemplate mt = MessageTemplate.MatchConversationId("racer-agent-move"); //MessageTemplate.MatchPerformative(ACLMessage.CFP);
+			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.CFP);
 			ACLMessage msg = myAgent.receive(mt);
-			if (msg != null) {
+			if (msg != null && msg.getContent() != null) {
 				// CFP Message received. Process it
 				String position = msg.getContent();
 				ACLMessage reply = msg.createReply();
@@ -132,6 +133,23 @@ public class MapAgent extends Agent {
 				reply.setContent(Integer.toString(roadType) + ":" + Integer.toString(maxX) + ":" + Integer.toString(maxY));
 				
 				myAgent.send(reply);				
+			}
+			else {
+				block();
+			}
+		}
+	}
+    
+    private class CheckPositionInform extends CyclicBehaviour {
+		public void action() {
+            
+			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.ACCEPT_PROPOSAL);
+			ACLMessage msg = myAgent.receive(mt);
+			if (msg != null) {
+				// ACCEPT_PROPOSAL Message received. Process it
+				ACLMessage reply = msg.createReply();
+				reply.setPerformative(ACLMessage.INFORM);
+				myAgent.send(reply);
 			}
 			else {
 				block();
