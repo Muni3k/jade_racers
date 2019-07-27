@@ -32,7 +32,7 @@ public class MapAgent extends Agent {
 	protected void setup() {
 	
 		// Create the map
-		map = new int[][] {
+		/*map = new int[][] {
 	  		{ 9, 9, 9, 9, 9, 9, 9, 9, 9, 0 },
 	  		{ 0, 0, 0, 0, 0, 0, 0, 0, 9, 0 },
 	  		{ 0, 0, 0, 0, 0, 0, 0, 0, 9, 0 },
@@ -43,6 +43,19 @@ public class MapAgent extends Agent {
 			{ 0, 0, 0, 0, 0, 0, 9, 0, 0, 0 },
 			{ 0, 0, 0, 0, 0, 0, 9, 0, 0, 0 },
 	  		{ 0, 0, 0, 0, 0, 0, 9, 9, 9, 9 }
+		};*/
+		
+		map = new int[][] {
+	  		{ 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 },
+	  		{ 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 },
+	  		{ 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 },
+	  		{ 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 },
+			{ 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 },
+			{ 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 },
+			{ 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 },
+			{ 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 },
+			{ 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 },
+	  		{ 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 }
 		};
         /*map = new int[][] {
 	  		{ 9, 5, 7 },
@@ -106,8 +119,6 @@ public class MapAgent extends Agent {
 		catch (FIPAException fe) {
 			fe.printStackTrace();
 		}
-		// Printout a dismissal message
-		//System.out.println("Map Agent "+getAID().getName()+" terminating.");
 	}
 
 	private class CheckPosition extends CyclicBehaviour {
@@ -127,7 +138,6 @@ public class MapAgent extends Agent {
 				int y = Integer.parseInt(tempArray[1]);
                                 
 				int roadType = map[y][x];
-                //System.out.println("roadType " + roadType);
 				
 				reply.setPerformative(ACLMessage.PROPOSE);
 				reply.setContent(Integer.toString(roadType) + ":" + Integer.toString(maxX) + ":" + Integer.toString(maxY));
@@ -190,21 +200,14 @@ public class MapAgent extends Agent {
 						int x = Integer.parseInt(reply.getContent().split(":")[0]);
 						int y = Integer.parseInt(reply.getContent().split(":")[1]);
 						
-						int oldX = Integer.parseInt(reply.getContent().split(":")[2]);
-						int oldY = Integer.parseInt(reply.getContent().split(":")[3]);
-						int oldTypeRoad = Integer.parseInt(reply.getContent().split(":")[4]);
-                        
-                        int lap = Integer.parseInt(reply.getContent().split(":")[5]);
+                        int lap = Integer.parseInt(reply.getContent().split(":")[2]);
                         if(laps <= lap) { System.out.println("Linie mety przekroczyl kierowca " + reply.getSender().getName()); }
-						
-						//map[oldY][oldX] = oldTypeRoad;
-						//map[y][x] = -1;
-						
+												
+						System.out.println("x: " + x + " y: " + y);
 						List<Integer> position = new ArrayList<Integer>();
 						position.add(y);
 						position.add(x);
 						racersMap.put(reply.getSender().getLocalName(), position);
-						//System.out.println("Position (" + x + ";" + y + ") from agent " + reply.getSender().getName());
 					}
 					else {
 						//System.out.println("Attempt failed!");
@@ -252,13 +255,11 @@ public class MapAgent extends Agent {
 		public void action() {
 			MessageTemplate mt = MessageTemplate.MatchConversationId("map-agent-sieze-of-map");
 			ACLMessage msg = myAgent.receive(mt);
-			//System.out.println("sendSizeOfMap v1");
 			if (msg != null) {
 				// CFP Message received. Process it
 				String position = msg.getContent();
 				ACLMessage reply = msg.createReply();
 
-				//System.out.println("sendSizeOfMap v2");
 				reply.setPerformative(ACLMessage.INFORM);
 				reply.setContent(Integer.toString(maxX) + ":" + Integer.toString(maxY));
 				

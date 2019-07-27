@@ -18,14 +18,10 @@ public class RacerAgent extends Agent {
 	private int y;
     
     private int lap;
-	
-	private int oldX;
-	private int oldY;
-	
+		
 	private int maxX;
 	private int maxY;
     
-	private int oldTypeRoad = 9;
 	private AID[] mapAgents;
 
 	// Put agent initializations here
@@ -76,11 +72,11 @@ public class RacerAgent extends Agent {
 					myAgent.addBehaviour(new sendAskForSizeOfMap());
 					myAgent.addBehaviour(new getSizeOfMap());
 					myAgent.addBehaviour(new makeMove());
-					
-					
+					myAgent.addBehaviour(new sendPos());
+										
 			}
 		});
-		addBehaviour(new sendPos());
+		
 	}
 
 	// Put agent clean-up operations here
@@ -92,8 +88,6 @@ public class RacerAgent extends Agent {
 		catch (FIPAException fe) {
 			fe.printStackTrace();
 		}
-		// Printout a dismissal message
-		//System.out.println("Racer Agent "+getAID().getName()+" terminating.");
 	}
 	
 	private class makeMove extends Behaviour {
@@ -109,19 +103,14 @@ public class RacerAgent extends Agent {
 			switch (step) {
 			case 0: //send CFP
 				Random r = new Random();
-                    
-                //System.out.println("maxx " + maxX);
-                //System.out.println("maxy " + maxY);
-                    
-                newX = r.nextInt(((x+1) - (x-1)) + 1) + (x-1);
-				newY = r.nextInt(((y+1) - (y-1)) + 1) + (y-1);
+                newX = r.nextInt(((x+1) - (x-1))) + x; //;r.nextInt(((x+1) - (x-1)) + 1) + (x-1);
+				newY = r.nextInt(((y+1) - (y-1))) + y; //r.nextInt(((y+1) - (y-1)) + 1) + (y-1);
                 if(newX >= maxX) { newX = maxX-1; }
                 if(newY >= maxY) { newY = maxY-1; }
                 if(newX < 0) { newX = 0; }
                 if(newY < 0) { newY = 0; }
 				
-				//System.out.println("newX: " + newX);
-				//System.out.println("newY: " + newY);
+				System.out.println("newx: " + newX + " newy: " + newY);
 				// Send the cfp to all maps
 				ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
 				for (int i = 0; i < mapAgents.length; ++i) {
@@ -172,9 +161,6 @@ public class RacerAgent extends Agent {
 				reply = myAgent.receive(mt);
 				if (reply != null) {
 					if (reply.getPerformative() == ACLMessage.INFORM) {
-                        oldX = x;
-                        oldY = y;
-                        oldTypeRoad = newPosition;
                         x = newX;
                         y = newY;
 
@@ -218,8 +204,7 @@ public class RacerAgent extends Agent {
 				ACLMessage reply = msg.createReply();
 
 				reply.setPerformative(ACLMessage.INFORM);
-				reply.setContent(x + ":" + y + ":" + oldX + ":" + oldY + ":" + oldTypeRoad + ":" + lap);
-				//System.out.println(myAgent.getName() + " answered to agent " + msg.getSender().getName() + " with position (" + x + ";" + y + ") and lap no " + lap);
+				reply.setContent(x + ":" + y + ":" + lap);
 
 				myAgent.send(reply);
 			}
@@ -231,7 +216,6 @@ public class RacerAgent extends Agent {
 	
 	private class sendAskForSizeOfMap extends OneShotBehaviour{
 		public void action() {
-			//System.out.println("sendAskForSizeOfMap");
 			ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
 			for (int i = 0; i < mapAgents.length; ++i) {
 				cfp.addReceiver(mapAgents[i]);
@@ -246,7 +230,6 @@ public class RacerAgent extends Agent {
 	private class getSizeOfMap extends CyclicBehaviour{
 		
 		public void action() {
-			//System.out.println("getSizeOfMap");
 			// Prepare the template to get proposals
 			MessageTemplate mt = MessageTemplate.MatchConversationId("map-agent-sieze-of-map");
 			
@@ -257,8 +240,6 @@ public class RacerAgent extends Agent {
 				tempArray = reply.getContent().split(":");
 				maxX = Integer.parseInt(tempArray[0]);
 				maxY = Integer.parseInt(tempArray[1]);
-				
-				//System.out.println("Max: " + maxX + " MaxY: " + maxY);
 			}
 		}
 	}
